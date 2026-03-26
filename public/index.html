@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sefaria AI Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Frank+Ruhl+Libre:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a1208;--brown:#5c3d1e;--gold:#c8922a;--faded:#8a7455;--border:#c8b89a;--bg:#fdf8ef;--panel:#f0e6d0;--parchment:#f5edd8;--blue:#1e3a5f; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;}
+  .rule{height:5px;background:linear-gradient(90deg,var(--brown),var(--gold),var(--brown));}
+  header{background:var(--ink);padding:22px 32px;display:flex;align-items:center;gap:14px;}
+  .star{font-size:28px;color:var(--gold);}
+  .h-title{font-family:'Frank Ruhl Libre',serif;font-size:22px;color:var(--parchment);font-weight:700;}
+  .h-sub{font-size:13px;color:#e8b84b;font-style:italic;margin-top:2px;opacity:.85;}
+  main{max-width:920px;margin:0 auto;padding:32px 20px 60px;}
+  .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:8px;}
+  .row{display:flex;gap:8px;margin-bottom:10px;}
+  input{flex:1;padding:12px 14px;font-family:'Crimson Pro',serif;font-size:17px;background:var(--parchment);border:1.5px solid var(--border);border-radius:4px;color:var(--ink);outline:none;}
+  input:focus{border-color:var(--gold);}
+  input::placeholder{color:var(--faded);font-style:italic;}
+  .go{padding:12px 24px;background:var(--brown);color:var(--parchment);border:none;border-radius:4px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;cursor:pointer;white-space:nowrap;transition:background .2s;}
+  .go:hover{background:var(--gold);color:var(--ink);}
+  .go:disabled{opacity:.4;cursor:not-allowed;background:var(--brown);}
+  .pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:24px;}
+  .pill{padding:3px 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--brown);cursor:pointer;background:transparent;font-family:'Crimson Pro',serif;transition:all .15s;}
+  .pill:hover{background:var(--brown);color:var(--parchment);border-color:var(--brown);}
+  .opts{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:24px;}
+  .og{display:flex;flex-direction:column;gap:7px;}
+  .tp{display:flex;gap:5px;flex-wrap:wrap;}
+  .tog{padding:5px 12px;border:1.5px solid var(--border);border-radius:3px;font-size:13px;font-family:'Crimson Pro',serif;color:var(--brown);cursor:pointer;background:transparent;transition:all .15s;}
+  .tog.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:600px){.panels{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+  .ph{padding:9px 14px;background:var(--ink);display:flex;justify-content:space-between;align-items:center;}
+  .pt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#e8b84b;}
+  .pr{font-size:11px;color:#7a6a50;font-style:italic;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pb{padding:18px 16px;min-height:180px;font-size:16px;line-height:1.8;}
+  .heb{font-family:'Frank Ruhl Libre',serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;color:var(--blue);}
+  .heb p{margin-bottom:4px;}
+  .eng p{margin-bottom:8px;}
+  .note-sec{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:14px;color:var(--brown);}
+  .note-sec p{margin-bottom:6px;}
+  .ph-text{color:var(--faded);font-style:italic;font-size:14px;}
+  .loader{display:flex;align-items:center;gap:8px;color:var(--faded);font-style:italic;font-size:14px;}
+  .dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:3px;animation:b 1.2s infinite ease-in-out both;}
+  .dots span:nth-child(1){animation-delay:-.32s;}
+  .dots span:nth-child(2){animation-delay:-.16s;}
+  @keyframes b{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+  .err{color:#8b2020;font-size:14px;font-style:italic;}
+  .ornament{text-align:center;color:var(--gold);font-size:17px;margin:22px 0 14px;letter-spacing:.4em;display:none;}
+  .footer-note{padding:10px 14px;border-left:3px solid var(--gold);background:var(--parchment);font-size:12px;color:var(--faded);font-style:italic;line-height:1.6;border-radius:0 4px 4px 0;display:none;}
+  .footer-note strong{color:var(--brown);font-style:normal;}
+</style>
+</head>
+<body>
+<div class="rule"></div>
+<header>
+  <span class="star">✡</span>
+  <div>
+    <div class="h-title">Sefaria AI Translator</div>
+    <div class="h-sub">Fetch any Jewish text · Translate with Claude</div>
+  </div>
+</header>
+<main>
+  <span class="mono">Enter a Sefaria reference</span>
+  <div class="row">
+    <input id="ref" type="text" placeholder="e.g. Berakhot 2a, Rashi on Genesis 1:1, Pirkei Avot 1:1" />
+    <button class="go" id="goBtn" onclick="run()">TRANSLATE</button>
+  </div>
+  <div class="pills">
+    <span class="mono" style="margin:0">Try:</span>
+    <button class="pill" onclick="ex('Berakhot 2a')">Berakhot 2a</button>
+    <button class="pill" onclick="ex('Pirkei Avot 1:1')">Pirkei Avot 1:1</button>
+    <button class="pill" onclick="ex('Rashi on Genesis 1:1')">Rashi on Genesis 1:1</button>
+    <button class="pill" onclick="ex('Mishneh Torah, Laws of Teshuvah 1:1')">Rambam on Teshuvah</button>
+    <button class="pill" onclick="ex('Kuzari 1:1')">Kuzari 1:1</button>
+  </div>
+  <div class="opts">
+    <div class="og">
+      <span class="mono">Style</span>
+      <div class="tp">
+        <button class="tog on" data-s="literal" onclick="setS(this)">Literal</button>
+        <button class="tog" data-s="readable" onclick="setS(this)">Readable</button>
+        <button class="tog" data-s="scholarly" onclick="setS(this)">Scholarly</button>
+        <button class="tog" data-s="accessible" onclick="setS(this)">Beginner-friendly</button>
+      </div>
+    </div>
+    <div class="og">
+      <span class="mono">Annotation</span>
+      <div class="tp">
+        <button class="tog on" data-a="none" onclick="setA(this)">None</button>
+        <button class="tog" data-a="brief" onclick="setA(this)">Brief notes</button>
+        <button class="tog" data-a="full" onclick="setA(this)">Full commentary</button>
+      </div>
+    </div>
+  </div>
+  <div class="panels">
+    <div class="panel">
+      <div class="ph"><span class="pt">Original text</span><span class="pr" id="srcRef">—</span></div>
+      <div class="pb" id="srcBody"><p class="ph-text">Hebrew or Aramaic will appear here.</p></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span class="pt">AI translation</span><span class="pr">Gemini</span></div>
+      <div class="pb" id="trnBody"><p class="ph-text">English translation will appear here.</p></div>
+    </div>
+  </div>
+  <div class="ornament" id="orn">✦ &nbsp; ✡ &nbsp; ✦</div>
+  <div class="footer-note" id="fn">
+    <strong>Note:</strong> AI-generated translation for study purposes only. Not for halachic decisions. Text sourced from <strong>Sefaria.org</strong>.
+  </div>
+</main>
+<script>
+  let sty='literal',ann='none';
+  function setS(b){document.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));b.classList.add('on');sty=b.dataset.s;}
+  function setA(b){document.querySelectorAll('[data-a]').forEach(x=>x.classList.remove('on'));b.classList.add('on');ann=b.dataset.a;}
+  function ex(r){document.getElementById('ref').value=r;run();}
+  document.getElementById('ref').addEventListener('keydown',e=>{if(e.key==='Enter')run();});
+  function ld(msg){return `<div class="loader"><div class="dots"><span></span><span></span><span></span></div>${msg}</div>`;}
+
+  async function run(){
+    const ref=document.getElementById('ref').value.trim();
+    if(!ref)return;
+    const btn=document.getElementById('goBtn');
+    btn.disabled=true;
+    document.getElementById('orn').style.display='none';
+    document.getElementById('fn').style.display='none';
+    document.getElementById('srcRef').textContent='—';
+    document.getElementById('srcBody').innerHTML=ld('Fetching from Sefaria…');
+    document.getElementById('trnBody').innerHTML='<p class="ph-text">Translation will appear here.</p>';
+
+    let hebrewText='',canonicalRef=ref;
+    try{
+      const r=await fetch(`/api/sefaria?ref=${encodeURIComponent(ref)}`);
+      const d=await r.json();
+      if(d.error)throw new Error(d.error);
+      canonicalRef=d.ref||ref;
+      let lines=[];
+      if(d.versions?.length){const hv=d.versions.find(v=>v.actualLanguage==='he'||v.language==='he');if(hv?.text)lines=[hv.text].flat(Infinity).filter(Boolean).map(l=>l.replace(/<[^>]+>/g,'').trim()).filter(Boolean);}
+      if(!lines.length&&d.he)lines=[d.he].flat(Infinity).filter(Boolean).map(l=>l.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
+      if(!lines.length)throw new Error('No Hebrew/Aramaic text found. Try a different reference.');
+      hebrewText=lines.join('\n');
+      document.getElementById('srcRef').textContent=canonicalRef;
+      document.getElementById('srcBody').innerHTML=`<div class="heb">${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
+    }catch(e){
+      document.getElementById('srcBody').innerHTML=`<p class="err">⚠ ${e.message}</p>`;
+      btn.disabled=false;return;
+    }
+
+    document.getElementById('trnBody').innerHTML=ld('Translating with Claude…');
+    try{
+      const r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hebrewText,ref:canonicalRef,style:sty,annotation:ann})});
+      const d=await r.json();
+      if(!r.ok||d.error)throw new Error(d.error||'Translation failed.');
+      const paras=d.translation.split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+      const noteHtml=d.notes?`<div class="note-sec">${d.notes.split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('')}</div>`:'';
+      document.getElementById('trnBody').innerHTML=`<div class="eng">${paras}${noteHtml}</div>`;
+      document.getElementById('orn').style.display='block';
+      document.getElementById('fn').style.display='block';
+    }catch(e){
+      document.getElementById('trnBody').innerHTML=`<p class="err">⚠ ${e.message}</p>`;
+    }
+    btn.disabled=false;
+  }
+</script>
+</body>
+</html>
