@@ -149,7 +149,7 @@
       btn.disabled=false;return;
     }
 
-    document.getElementById('trnBody').innerHTML=ld('Translating with Claude…');
+    document.getElementById('trnBody').innerHTML=ld('Translating with Gemini…');
     try{
       const r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hebrewText,ref:canonicalRef,style:sty,annotation:ann})});
       const d=await r.json();
