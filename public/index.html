@@ -3,166 +3,604 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sefaria AI Translator</title>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Frank+Ruhl+Libre:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
+<title>Sefaria Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#1a1208;--brown:#5c3d1e;--gold:#c8922a;--faded:#8a7455;--border:#c8b89a;--bg:#fdf8ef;--panel:#f0e6d0;--parchment:#f5edd8;--blue:#1e3a5f; }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--ink);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;}
-  .rule{height:5px;background:linear-gradient(90deg,var(--brown),var(--gold),var(--brown));}
-  header{background:var(--ink);padding:22px 32px;display:flex;align-items:center;gap:14px;}
-  .star{font-size:28px;color:var(--gold);}
-  .h-title{font-family:'Frank Ruhl Libre',serif;font-size:22px;color:var(--parchment);font-weight:700;}
-  .h-sub{font-size:13px;color:#e8b84b;font-style:italic;margin-top:2px;opacity:.85;}
-  main{max-width:920px;margin:0 auto;padding:32px 20px 60px;}
-  .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:8px;}
-  .row{display:flex;gap:8px;margin-bottom:10px;}
-  input{flex:1;padding:12px 14px;font-family:'Crimson Pro',serif;font-size:17px;background:var(--parchment);border:1.5px solid var(--border);border-radius:4px;color:var(--ink);outline:none;}
-  input:focus{border-color:var(--gold);}
-  input::placeholder{color:var(--faded);font-style:italic;}
-  .go{padding:12px 24px;background:var(--brown);color:var(--parchment);border:none;border-radius:4px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;cursor:pointer;white-space:nowrap;transition:background .2s;}
-  .go:hover{background:var(--gold);color:var(--ink);}
-  .go:disabled{opacity:.4;cursor:not-allowed;background:var(--brown);}
-  .pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:24px;}
-  .pill{padding:3px 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--brown);cursor:pointer;background:transparent;font-family:'Crimson Pro',serif;transition:all .15s;}
-  .pill:hover{background:var(--brown);color:var(--parchment);border-color:var(--brown);}
-  .opts{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:24px;}
-  .og{display:flex;flex-direction:column;gap:7px;}
-  .tp{display:flex;gap:5px;flex-wrap:wrap;}
-  .tog{padding:5px 12px;border:1.5px solid var(--border);border-radius:3px;font-size:13px;font-family:'Crimson Pro',serif;color:var(--brown);cursor:pointer;background:transparent;transition:all .15s;}
-  .tog.on{background:var(--blue);color:#fff;border-color:var(--blue);}
-  .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  @media(max-width:600px){.panels{grid-template-columns:1fr;}}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-  .ph{padding:9px 14px;background:var(--ink);display:flex;justify-content:space-between;align-items:center;}
-  .pt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#e8b84b;}
-  .pr{font-size:11px;color:#7a6a50;font-style:italic;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .pb{padding:18px 16px;min-height:180px;font-size:16px;line-height:1.8;}
-  .heb{font-family:'Frank Ruhl Libre',serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;color:var(--blue);}
-  .heb p{margin-bottom:4px;}
-  .eng p{margin-bottom:8px;}
-  .note-sec{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:14px;color:var(--brown);}
-  .note-sec p{margin-bottom:6px;}
-  .ph-text{color:var(--faded);font-style:italic;font-size:14px;}
-  .loader{display:flex;align-items:center;gap:8px;color:var(--faded);font-style:italic;font-size:14px;}
-  .dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:3px;animation:b 1.2s infinite ease-in-out both;}
-  .dots span:nth-child(1){animation-delay:-.32s;}
-  .dots span:nth-child(2){animation-delay:-.16s;}
-  @keyframes b{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
-  .err{color:#8b2020;font-size:14px;font-style:italic;}
-  .ornament{text-align:center;color:var(--gold);font-size:17px;margin:22px 0 14px;letter-spacing:.4em;display:none;}
-  .footer-note{padding:10px 14px;border-left:3px solid var(--gold);background:var(--parchment);font-size:12px;color:var(--faded);font-style:italic;line-height:1.6;border-radius:0 4px 4px 0;display:none;}
-  .footer-note strong{color:var(--brown);font-style:normal;}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #f0f0f0;
+    --text2: #909090;
+    --text3: #606060;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2e;
+    --blue: #4a9eff;
+    --blue-dim: #1a3a5c;
+    --hebrew: #7eb8f7;
+    --success: #4caf7d;
+    --error: #e05c5c;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    background: rgba(15,15,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-star {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #c9a84c, #8a6e2e);
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Main ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #f0f0f0 40%, #c9a84c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 300;
+  }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 16px 120px 16px 46px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-input:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+
+  .search-input::placeholder { color: var(--text3); }
+
+  .search-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 8px 18px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .search-btn:hover { opacity: 0.85; }
+  .search-btn:active { transform: translateY(-50%) scale(0.97); }
+  .search-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── Examples ── */
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  .ex-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .ex-pill {
+    padding: 4px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .ex-pill:hover {
+    border-color: var(--gold-dim);
+    color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* ── Options ── */
+  .options {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .opt-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .opt-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    font-weight: 500;
+  }
+
+  .tog-row { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .tog {
+    padding: 5px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text2);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+    font-weight: 400;
+  }
+
+  .tog:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  .tog.on {
+    background: var(--blue-dim);
+    color: var(--blue);
+    border-color: rgba(74,158,255,0.3);
+    font-weight: 500;
+  }
+
+  /* ── Status bar ── */
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .status-bar.visible { display: flex; }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-ref {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* ── Panels ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 620px) { .panels { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .panel.has-content { border-color: var(--border2); }
+
+  .panel-head {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+
+  .panel-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    font-weight: 600;
+  }
+
+  .panel-ref {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .panel-body {
+    padding: 20px 18px;
+    min-height: 200px;
+  }
+
+  .placeholder {
+    color: var(--text3);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  .hebrew-text {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 21px;
+    line-height: 2;
+    direction: rtl;
+    text-align: right;
+    color: var(--hebrew);
+  }
+
+  .hebrew-text p { margin-bottom: 4px; }
+
+  .english-text {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  .english-text p { margin-bottom: 10px; }
+
+  .notes-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .notes-section p { margin-bottom: 6px; }
+
+  .err-msg {
+    color: var(--error);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── Footer note ── */
+  .footer-note {
+    display: none;
+    margin-top: 20px;
+    padding: 10px 16px;
+    border-left: 2px solid var(--gold-dim);
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.6;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--surface);
+  }
+
+  .footer-note a { color: var(--gold-dim); text-decoration: none; }
+  .footer-note a:hover { color: var(--gold); }
 </style>
 </head>
 <body>
-<div class="rule"></div>
+
 <header>
-  <span class="star">✡</span>
-  <div>
-    <div class="h-title">Sefaria AI Translator</div>
-    <div class="h-sub">Fetch any Jewish text · Translate with Claude</div>
+  <div class="logo">
+    <div class="logo-star">✡</div>
+    Sefaria Translator
   </div>
+  <span class="badge">Powered by Gemini</span>
 </header>
+
 <main>
-  <span class="mono">Enter a Sefaria reference</span>
-  <div class="row">
-    <input id="ref" type="text" placeholder="e.g. Berakhot 2a, Rashi on Genesis 1:1, Pirkei Avot 1:1" />
-    <button class="go" id="goBtn" onclick="run()">TRANSLATE</button>
+  <div class="hero">
+    <h1>Translate Jewish Texts</h1>
+    <p>Search any text from the Sefaria library and get an instant English translation</p>
   </div>
-  <div class="pills">
-    <span class="mono" style="margin:0">Try:</span>
-    <button class="pill" onclick="ex('Berakhot 2a')">Berakhot 2a</button>
-    <button class="pill" onclick="ex('Pirkei Avot 1:1')">Pirkei Avot 1:1</button>
-    <button class="pill" onclick="ex('Rashi on Genesis 1:1')">Rashi on Genesis 1:1</button>
-    <button class="pill" onclick="ex('Mishneh Torah, Laws of Teshuvah 1:1')">Rambam on Teshuvah</button>
-    <button class="pill" onclick="ex('Kuzari 1:1')">Kuzari 1:1</button>
+
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input
+      class="search-input"
+      id="searchInput"
+      type="text"
+      placeholder="e.g. Bekhor Shor on Leviticus 6:2, Berakhot 2a, Rashi on Genesis 1:1…"
+      autocomplete="off"
+    />
+    <button class="search-btn" id="searchBtn" onclick="run()">Translate</button>
   </div>
-  <div class="opts">
-    <div class="og">
-      <span class="mono">Style</span>
-      <div class="tp">
+
+  <div class="examples">
+    <span class="ex-label">Try</span>
+    <button class="ex-pill" onclick="ex('Berakhot 2a')">Berakhot 2a</button>
+    <button class="ex-pill" onclick="ex('Pirkei Avot 1:1')">Pirkei Avot 1:1</button>
+    <button class="ex-pill" onclick="ex('Rashi on Genesis 1:1')">Rashi on Genesis 1:1</button>
+    <button class="ex-pill" onclick="ex('Bekhor Shor on Leviticus 6:2')">Bekhor Shor on Leviticus 6:2</button>
+    <button class="ex-pill" onclick="ex('Rambam laws of teshuvah chapter 1')">Rambam on Teshuvah</button>
+    <button class="ex-pill" onclick="ex('Kuzari 1:1')">Kuzari 1:1</button>
+  </div>
+
+  <div class="options">
+    <div class="opt-group">
+      <span class="opt-label">Style</span>
+      <div class="tog-row">
         <button class="tog on" data-s="literal" onclick="setS(this)">Literal</button>
         <button class="tog" data-s="readable" onclick="setS(this)">Readable</button>
         <button class="tog" data-s="scholarly" onclick="setS(this)">Scholarly</button>
         <button class="tog" data-s="accessible" onclick="setS(this)">Beginner-friendly</button>
       </div>
     </div>
-    <div class="og">
-      <span class="mono">Annotation</span>
-      <div class="tp">
+    <div class="opt-group">
+      <span class="opt-label">Annotation</span>
+      <div class="tog-row">
         <button class="tog on" data-a="none" onclick="setA(this)">None</button>
         <button class="tog" data-a="brief" onclick="setA(this)">Brief notes</button>
         <button class="tog" data-a="full" onclick="setA(this)">Full commentary</button>
       </div>
     </div>
   </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="spinner"></div>
+    <span id="statusMsg">Resolving reference…</span>
+    <span class="status-ref" id="statusRef"></span>
+  </div>
+
   <div class="panels">
-    <div class="panel">
-      <div class="ph"><span class="pt">Original text</span><span class="pr" id="srcRef">—</span></div>
-      <div class="pb" id="srcBody"><p class="ph-text">Hebrew or Aramaic will appear here.</p></div>
+    <div class="panel" id="srcPanel">
+      <div class="panel-head">
+        <span class="panel-label">Original text</span>
+        <span class="panel-ref" id="srcRef"></span>
+      </div>
+      <div class="panel-body" id="srcBody">
+        <p class="placeholder">Original Hebrew or Aramaic will appear here.</p>
+      </div>
     </div>
-    <div class="panel">
-      <div class="ph"><span class="pt">AI translation</span><span class="pr">Gemini</span></div>
-      <div class="pb" id="trnBody"><p class="ph-text">English translation will appear here.</p></div>
+    <div class="panel" id="trnPanel">
+      <div class="panel-head">
+        <span class="panel-label">Translation</span>
+        <span class="panel-ref" id="trnRef"></span>
+      </div>
+      <div class="panel-body" id="trnBody">
+        <p class="placeholder">English translation will appear here.</p>
+      </div>
     </div>
   </div>
-  <div class="ornament" id="orn">✦ &nbsp; ✡ &nbsp; ✦</div>
-  <div class="footer-note" id="fn">
-    <strong>Note:</strong> AI-generated translation for study purposes only. Not for halachic decisions. Text sourced from <strong>Sefaria.org</strong>.
+
+  <div class="footer-note" id="footerNote">
+    AI-generated translation for study purposes only. Not for halachic decisions.
+    Text sourced from <a href="https://sefaria.org" target="_blank">Sefaria.org</a>.
   </div>
 </main>
+
 <script>
-  let sty='literal',ann='none';
-  function setS(b){document.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));b.classList.add('on');sty=b.dataset.s;}
-  function setA(b){document.querySelectorAll('[data-a]').forEach(x=>x.classList.remove('on'));b.classList.add('on');ann=b.dataset.a;}
-  function ex(r){document.getElementById('ref').value=r;run();}
-  document.getElementById('ref').addEventListener('keydown',e=>{if(e.key==='Enter')run();});
-  function ld(msg){return `<div class="loader"><div class="dots"><span></span><span></span><span></span></div>${msg}</div>`;}
+  let sty = 'literal', ann = 'none';
 
-  async function run(){
-    const ref=document.getElementById('ref').value.trim();
-    if(!ref)return;
-    const btn=document.getElementById('goBtn');
-    btn.disabled=true;
-    document.getElementById('orn').style.display='none';
-    document.getElementById('fn').style.display='none';
-    document.getElementById('srcRef').textContent='—';
-    document.getElementById('srcBody').innerHTML=ld('Fetching from Sefaria…');
-    document.getElementById('trnBody').innerHTML='<p class="ph-text">Translation will appear here.</p>';
+  function setS(b) { document.querySelectorAll('[data-s]').forEach(x => x.classList.remove('on')); b.classList.add('on'); sty = b.dataset.s; }
+  function setA(b) { document.querySelectorAll('[data-a]').forEach(x => x.classList.remove('on')); b.classList.add('on'); ann = b.dataset.a; }
+  function ex(q) { document.getElementById('searchInput').value = q; run(); }
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
 
-    let hebrewText='',canonicalRef=ref;
-    try{
-      const r=await fetch(`/api/sefaria?ref=${encodeURIComponent(ref)}`);
-      const d=await r.json();
-      if(d.error)throw new Error(d.error);
-      canonicalRef=d.ref||ref;
-      let lines=[];
-      if(d.versions?.length){const hv=d.versions.find(v=>v.actualLanguage==='he'||v.language==='he');if(hv?.text)lines=[hv.text].flat(Infinity).filter(Boolean).map(l=>l.replace(/<[^>]+>/g,'').trim()).filter(Boolean);}
-      if(!lines.length&&d.he)lines=[d.he].flat(Infinity).filter(Boolean).map(l=>l.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
-      if(!lines.length)throw new Error('No Hebrew/Aramaic text found. Try a different reference.');
-      hebrewText=lines.join('\n');
-      document.getElementById('srcRef').textContent=canonicalRef;
-      document.getElementById('srcBody').innerHTML=`<div class="heb">${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
-    }catch(e){
-      document.getElementById('srcBody').innerHTML=`<p class="err">⚠ ${e.message}</p>`;
-      btn.disabled=false;return;
+  function setStatus(msg, ref = '') {
+    const bar = document.getElementById('statusBar');
+    bar.classList.add('visible');
+    document.getElementById('statusMsg').textContent = msg;
+    document.getElementById('statusRef').textContent = ref;
+  }
+
+  function hideStatus() {
+    document.getElementById('statusBar').classList.remove('visible');
+  }
+
+  function setPanel(bodyId, html, hasContent = false) {
+    document.getElementById(bodyId).innerHTML = html;
+    document.getElementById(bodyId).closest('.panel').classList.toggle('has-content', hasContent);
+  }
+
+  async function run() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+    document.getElementById('footerNote').style.display = 'none';
+    document.getElementById('srcRef').textContent = '';
+    document.getElementById('trnRef').textContent = '';
+    setPanel('srcBody', '<p class="placeholder">Original Hebrew or Aramaic will appear here.</p>');
+    setPanel('trnBody', '<p class="placeholder">English translation will appear here.</p>');
+
+    // Step 1: Resolve fuzzy query to Sefaria ref
+    setStatus('Resolving reference…');
+    let sefariaRef = '', displayRef = '';
+    try {
+      const r = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const d = await r.json();
+      if (d.error && !d.ref) throw new Error(d.error);
+      if (!d.ref) throw new Error('Could not resolve reference. Try being more specific.');
+      sefariaRef = d.ref;
+      displayRef = d.display || d.ref;
+      document.getElementById('srcRef').textContent = displayRef;
+      document.getElementById('trnRef').textContent = displayRef;
+    } catch (e) {
+      setPanel('srcBody', `<p class="err-msg">⚠ ${e.message}</p>`);
+      hideStatus();
+      btn.disabled = false;
+      return;
     }
 
-    document.getElementById('trnBody').innerHTML=ld('Translating with Gemini…');
-    try{
-      const r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hebrewText,ref:canonicalRef,style:sty,annotation:ann})});
-      const d=await r.json();
-      if(!r.ok||d.error)throw new Error(d.error||'Translation failed.');
-      const paras=d.translation.split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('');
-      const noteHtml=d.notes?`<div class="note-sec">${d.notes.split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('')}</div>`:'';
-      document.getElementById('trnBody').innerHTML=`<div class="eng">${paras}${noteHtml}</div>`;
-      document.getElementById('orn').style.display='block';
-      document.getElementById('fn').style.display='block';
-    }catch(e){
-      document.getElementById('trnBody').innerHTML=`<p class="err">⚠ ${e.message}</p>`;
+    // Step 2: Fetch Hebrew text from Sefaria
+    setStatus('Fetching from Sefaria…', sefariaRef);
+    let hebrewText = '', canonicalRef = sefariaRef;
+    try {
+      const r = await fetch(`/api/sefaria?ref=${encodeURIComponent(sefariaRef)}`);
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      canonicalRef = d.ref || sefariaRef;
+
+      let lines = [];
+      if (d.versions?.length) {
+        const hv = d.versions.find(v => v.actualLanguage === 'he' || v.language === 'he');
+        if (hv?.text) lines = [hv.text].flat(Infinity).filter(Boolean).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+      }
+      if (!lines.length && d.he) {
+        lines = [d.he].flat(Infinity).filter(Boolean).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+      }
+      if (!lines.length) throw new Error('No Hebrew/Aramaic text found. Try a more specific reference.');
+
+      hebrewText = lines.join('\n');
+      setPanel('srcBody', `<div class="hebrew-text">${lines.map(l => `<p>${l}</p>`).join('')}</div>`, true);
+    } catch (e) {
+      setPanel('srcBody', `<p class="err-msg">⚠ ${e.message}</p>`);
+      hideStatus();
+      btn.disabled = false;
+      return;
     }
-    btn.disabled=false;
+
+    // Step 3: Translate
+    setStatus('Translating…', canonicalRef);
+    try {
+      const r = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hebrewText, ref: canonicalRef, style: sty, annotation: ann })
+      });
+      const d = await r.json();
+      if (!r.ok || d.error) throw new Error(d.error || 'Translation failed.');
+
+      const paras = d.translation.split(/\n+/).filter(Boolean).map(p => `<p>${p}</p>`).join('');
+      const noteHtml = d.notes
+        ? `<div class="notes-section">${d.notes.split(/\n+/).filter(Boolean).map(p => `<p>${p}</p>`).join('')}</div>`
+        : '';
+      setPanel('trnBody', `<div class="english-text">${paras}${noteHtml}</div>`, true);
+      document.getElementById('footerNote').style.display = 'block';
+    } catch (e) {
+      setPanel('trnBody', `<p class="err-msg">⚠ ${e.message}</p>`);
+    }
+
+    hideStatus();
+    btn.disabled = false;
   }
 </script>
 </body>
