@@ -8,43 +8,67 @@ export default async function handler(req, res) {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: "Missing query" });
 
+  // ── Parse Sefaria URLs directly, no AI needed ────────────────────────────
+  // Handles: https://www.sefaria.org/Bekhor_Shor%2C_Leviticus.6.3?lang=bi
+  const urlMatch = query.match(/sefaria\.org\/([^?#\s]+)/i);
+  if (urlMatch) {
+    try {
+      let raw = decodeURIComponent(urlMatch[1]);
+      raw = raw.replace(/_/g, ' ');
+      const parts = raw.split('.');
+      let ref;
+      if (parts.length === 1) {
+        ref = parts[0];
+      } else if (parts.length === 2) {
+        ref = parts[0] + ' ' + parts[1];
+      } else {
+        const book = parts.slice(0, -2).join(' ');
+        const chapter = parts[parts.length - 2];
+        const verse = parts[parts.length - 1];
+        ref = `${book} ${chapter}:${verse}`;
+      }
+      ref = ref.trim();
+      return res.status(200).json({ ref, display: ref });
+    } catch (e) {
+      // fall through to Gemini
+    }
+  }
+
+  // ── Use Gemini 1.5 Flash to resolve fuzzy natural language queries ────────
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured." });
 
-  // Ask Gemini to convert the fuzzy query into a valid Sefaria reference
-  const prompt = `You are an expert in classical Jewish texts and the Sefaria library's reference system.
+  const prompt = `You are an expert in classical Jewish texts and the Sefaria library reference system.
 
-Convert the following user query into a valid Sefaria API reference string.
+Convert this user query into a valid Sefaria API reference string.
 
-Sefaria reference rules:
-- Torah: "Genesis 1:1", "Exodus 3:14"
-- Talmud Bavli: "Berakhot 2a", "Shabbat 31a"
-- Mishnah: "Mishnah Berakhot 1:1", "Pirkei Avot 1:1"
-- Rashi: "Rashi on Genesis 1:1", "Rashi on Berakhot 2a"
-- Tosafot: "Tosafot on Berakhot 2a"
-- Rambam: "Mishneh Torah, Laws of Repentance 1:1"
-- Bekhor Shor: "Bekhor Shor, Genesis 1:1" (commentaries use comma format)
-- Ramban: "Ramban on Genesis 1:1"
+Format rules:
+- Torah: "Genesis 1:1", "Leviticus 6:3"
+- Talmud: "Berakhot 2a", "Shabbat 31a"
+- Mishnah: "Pirkei Avot 1:1", "Mishnah Berakhot 1:1"
+- Rashi: "Rashi on Genesis 1:1"
+- Ramban/Nachmanides: "Ramban on Genesis 1:1"
+- Bekhor Shor: "Bekhor Shor, Leviticus 6:3"
 - Ibn Ezra: "Ibn Ezra on Genesis 1:1"
+- Rambam: "Mishneh Torah, Laws of Repentance 1:1"
 - Kuzari: "Kuzari 1:1"
-- Sefer HaChinuch: "Sefer HaChinuch 1"
 
 User query: "${query}"
 
-Respond ONLY with a JSON object, no markdown:
-{"ref": "the exact Sefaria reference string", "display": "human-friendly name for this text"}
+Respond ONLY with valid JSON, no markdown:
+{"ref":"exact Sefaria reference","display":"human-friendly label"}
 
-If the query is too vague to resolve, return: {"ref": "", "display": "", "error": "Could not resolve to a specific text. Please be more specific."}`;
+If too vague: {"ref":"","display":"","error":"Please include a chapter and verse."}`;
 
   try {
     const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 256, temperature: 0.1 },
+          generationConfig: { maxOutputTokens: 128, temperature: 0.1 },
         }),
       }
     );
@@ -56,8 +80,7 @@ If the query is too vague to resolve, return: {"ref": "", "display": "", "error"
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) return res.status(500).json({ error: "Could not parse response." });
 
-    const parsed = JSON.parse(match[0]);
-    res.status(200).json(parsed);
+    res.status(200).json(JSON.parse(match[0]));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
